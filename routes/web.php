@@ -1,0 +1,79 @@
+<?php
+
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientServiceController;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\UserController;
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.manage')->name('roles.index');
+    Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:roles.manage')->name('roles.create');
+    Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.manage')->name('roles.store');
+    Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->middleware('permission:roles.manage')->name('roles.edit');
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('permission:roles.manage')->name('roles.update');
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('permission:roles.manage')->name('roles.destroy');
+  
+        // Clients
+    Route::get('/clients', [ClientController::class, 'index'])
+        ->middleware('permission:clients.view')
+        ->name('clients.index');
+
+    Route::get('/clients/create', [ClientController::class, 'create'])
+        ->middleware('permission:clients.create')
+        ->name('clients.create');
+
+    Route::post('/clients', [ClientController::class, 'store'])
+        ->middleware('permission:clients.create')
+        ->name('clients.store');
+
+    Route::get('/clients/{client}/edit', [ClientController::class, 'edit'])
+        ->middleware('permission:clients.edit')
+        ->name('clients.edit');
+
+    Route::put('/clients/{client}', [ClientController::class, 'update'])
+        ->middleware('permission:clients.edit')
+        ->name('clients.update');
+
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])
+        ->middleware('permission:clients.delete')
+        ->name('clients.destroy');
+
+    Route::get('/clients/{client}', [App\Http\Controllers\ClientController::class, 'show'])
+    ->middleware('permission:clients.profile.view')
+    ->name('clients.show');
+
+    //client services
+    Route::get('/client-services', [ClientServiceController::class, 'index'])->name('client_services.index');
+    Route::get('/client-services/create', [ClientServiceController::class, 'create'])->name('client_services.create');
+    Route::post('/client-services', [ClientServiceController::class, 'store'])->name('client_services.store');
+    Route::get('/client-services/{clientService}/edit', [ClientServiceController::class, 'edit'])->name('client_services.edit');
+    Route::put('/client-services/{clientService}', [ClientServiceController::class, 'update'])->name('client_services.update');
+    Route::delete('/client-services/{clientService}', [ClientServiceController::class, 'destroy'])->name('client_services.destroy');
+
+});
+Route::middleware(['auth', 'permission:users.manage'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
+Route::middleware(['auth', 'permission:services.manage'])->prefix('services')->group(function () {
+    Route::get('/', [ServiceController::class, 'index'])->name('services.index');
+    Route::get('/create', [ServiceController::class, 'create'])->name('services.create');
+    Route::get('/view/{id}', [ServiceController::class, 'show'])->name('services.show');
+    
+    Route::post('/store', [ServiceController::class, 'store'])->name('services.store');
+    Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('services.edit');
+    Route::post('/update/{id}', [ServiceController::class, 'update'])->name('services.update');
+    Route::delete('/delete/{id}', [ServiceController::class, 'delete'])->name('services.delete');
+});
+
+require __DIR__.'/Auth.php';
