@@ -17,10 +17,8 @@ return new class extends Migration
             $table->decimal('amount',12,2);
             $table->date('expense_date');
             $table->string('category')->nullable();
-            $table->text('notes')->nullable();
             $table->foreignId('recorded_by')->constrained('users');
             $table->timestamps();
-
             $table->index('expense_date');
         });
     }

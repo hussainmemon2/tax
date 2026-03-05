@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClientService;
+use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,17 +112,76 @@ class ServiceController extends Controller
             return back()->with('error', 'Unable to delete service.');
         }
     }
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $service = Service::with([
-            'clientServices.client',
-            'clientServices.invoices',
-            'clientServices.payments'
-        ])->findOrFail($id);
-
-        return view('services.show', compact('service'));
+        $service = Service::findOrFail($id);
+        return view('services.show', compact(
+            'service',
+            
+        ));
     }
+    public function ajaxData(Request $request, Service $service)
+    {
+        $tab = $request->tab ?? 'clients';
+        $search = $request->search ?? '';
 
+        if ($tab === 'clients') {
+
+            $data = ClientService::with('client')
+                ->where('service_id', $service->id)
+                ->when($search, function ($q) use ($search) {
+                    $q->whereHas('client', function ($qq) use ($search) {
+                        $qq->where('full_name', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10)
+                ->withQueryString();
+
+            return view('services.partials.clients', compact('data'))->render();
+        }
+
+        if ($tab === 'invoices') {
+
+            $data = Invoice::with('clientService.client')
+                ->whereHas('clientService', function ($q) use ($service) {
+                    $q->where('service_id', $service->id);
+                })
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($qq) use ($search) {
+                        $qq->where('invoice_number', 'like', "%{$search}%")
+                            ->orWhereHas('clientService.client', function ($qqq) use ($search) {
+                                $qqq->where('full_name', 'like', "%{$search}%");
+                            });
+                    });
+                })
+                ->paginate(10)
+                ->withQueryString();
+
+            return view('services.partials.invoices', compact('data'))->render();
+        }
+
+        if ($tab === 'payments') {
+
+            $data = Payment::with('clientService.client')
+                ->whereHas('clientService', function ($q) use ($service) {
+                    $q->where('service_id', $service->id);
+                })
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($qq) use ($search) {
+                        $qq->where('id', 'like', "%{$search}%")
+                            ->orWhereHas('clientService.client', function ($qqq) use ($search) {
+                                $qqq->where('full_name', 'like', "%{$search}%");
+                            });
+                    });
+                })
+                ->paginate(10)
+                ->withQueryString();
+
+            return view('services.partials.payments', compact('data'))->render();
+        }
+
+        return response()->json(['error' => 'Invalid tab'], 400);
+    }
     private function validationRules($ignoreId = null)
     {
         $uniqueRule = 'unique:services,name';

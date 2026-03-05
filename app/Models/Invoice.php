@@ -9,6 +9,9 @@ class Invoice extends Model
 {
     protected $fillable = ['client_id','client_service_id','invoice_number','total_amount','issued_date' ,'narration'];
 
+    protected $casts = [
+    'issued_date' => 'datetime',
+    ];
     public static function generateInvoiceNumber()
     {
         return DB::transaction(function () {

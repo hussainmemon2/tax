@@ -69,8 +69,6 @@ class Client extends Model
 
     public function getDisplayNameAttribute()
     {
-        return $this->client_type === 'business'
-            ? $this->business_name
-            : $this->full_name;
+        return  $this->full_name;
     }
 }

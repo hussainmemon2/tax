@@ -20,6 +20,10 @@ class Payment extends Model
     {
         return $this->belongsTo(Client::class);
     }
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'recorded_by');
+    }
 
     public function financeIncome()
     {

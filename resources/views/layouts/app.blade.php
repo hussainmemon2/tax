@@ -93,6 +93,18 @@
                     <i class="bi bi-journal-plus"></i> Assign Services
             </a>
         @endcan
+        @can('finance.manage')
+        <a href="{{ route('finance.index') }}" 
+        class="{{ request()->routeIs('finance.*') ? 'active' : '' }}">
+            <i class="bi bi-person-vcard-fill"></i>
+            Finance
+        </a>
+        @endcan
+        @can('documents.manage')
+            <a href="{{ route('documents.index') }}" class="{{ request()->routeIs('documents.*') ? 'active' : '' }}">
+                    <i class="bi bi-files"></i> Documents
+            </a>
+        @endcan
     </div>
 
     <div class="sidebar-foot">
@@ -132,7 +144,6 @@
 
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form method="POST" action="{{ route('logout') }}">

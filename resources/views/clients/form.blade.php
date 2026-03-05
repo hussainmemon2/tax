@@ -527,7 +527,7 @@
                         <input type="date"
                                name="business_registration_date"
                                class="pf-control"
-                               value="{{ old('business_registration_date', $client->business_registration_date->format('Y-m-d')  ?? '') }}">
+                               value="{{ old('business_registration_date', isset($client) ? $client->business_registration_date->format('Y-m-d')  : '') }}">
                     </div>
                 </div>
 
@@ -538,7 +538,7 @@
                         <input type="date"
                                name="portal_registration_date"
                                class="pf-control"
-                               value="{{ old('portal_registration_date', $client->portal_registration_date->format('Y-m-d') ?? '') }}">
+                               value="{{ old('portal_registration_date', isset($client) ? $client->portal_registration_date->format('Y-m-d')  : '') }}">
                     </div>
                 </div>
 

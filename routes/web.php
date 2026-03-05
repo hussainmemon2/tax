@@ -3,6 +3,8 @@
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientServiceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\FinanceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
@@ -56,7 +58,15 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/client-services/{clientService}', [ClientServiceController::class, 'update'])->name('client_services.update');
     Route::delete('/client-services/{clientService}', [ClientServiceController::class, 'destroy'])->name('client_services.destroy');
 
-});
+    Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index')->middleware('permission:finance.manage');
+    Route::get('/voucher/create', [FinanceController::class, 'voucher'])->name('finance.vouchers.create')->middleware('permission:finance.manage');
+    Route::post('/voucher/store', [FinanceController::class, 'voucherstore'])->name('vouchers.store')->middleware('permission:finance.manage');
+    Route::post('/expenses/store', [FinanceController::class, 'storeExpense'])->name('finance.expenses.store')->middleware('permission:finance.manage');
+    Route::get('/finance/data', [FinanceController::class, 'ajaxData'])->name('finance.ajax');
+    Route::get('/client-services/{id}', [FinanceController::class, 'getServices'])->name('finance.client_services');
+    Route::get('/finance/total-invoiced', [FinanceController::class, 'totalInvoiced'])->name('finance.total_invoiced');
+
+    });
 Route::middleware(['auth', 'permission:users.manage'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
@@ -69,11 +79,27 @@ Route::middleware(['auth', 'permission:services.manage'])->prefix('services')->g
     Route::get('/', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/create', [ServiceController::class, 'create'])->name('services.create');
     Route::get('/view/{id}', [ServiceController::class, 'show'])->name('services.show');
-    
+    Route::get('/{service}/data', [ServiceController::class, 'ajaxData'])
+    ->name('services.ajax');
     Route::post('/store', [ServiceController::class, 'store'])->name('services.store');
     Route::get('/edit/{id}', [ServiceController::class, 'edit'])->name('services.edit');
     Route::post('/update/{id}', [ServiceController::class, 'update'])->name('services.update');
     Route::delete('/delete/{id}', [ServiceController::class, 'delete'])->name('services.delete');
+});
+
+
+Route::middleware(['auth', 'permission:documents.manage'])->group(function () {
+Route::get('/documents', [DocumentController::class,'index'])->name('documents.index');
+Route::get('/documents/ajax', [DocumentController::class,'ajax'])
+    ->name('documents.ajax');
+Route::get('/documents/services', [DocumentController::class,'services'])
+    ->name('documents.services');
+Route::get('/documents/download/{id}', [DocumentController::class,'download'])
+    ->name('documents.download');
+Route::get('/documents/create', [DocumentController::class,'create'])
+    ->name('documents.create');
+Route::post('/documents/upload', [DocumentController::class,'uploaddocuments'])
+->name('documents.upload');
 });
 
 require __DIR__.'/Auth.php';

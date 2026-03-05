@@ -4,186 +4,185 @@
 
 @section('content')
 
+<style>
+    .page-header {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px; margin-bottom: 28px;
+    }
+    .page-header .eyebrow {
+        font-size: .7rem; font-weight: 600; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+    }
+    .page-header h2 {
+        font-family: 'Playfair Display', serif; font-size: 1.55rem;
+        font-weight: 700; color: var(--text-main); margin: 0;
+    }
+    .page-header p { font-size: .84rem; color: var(--text-sub); margin: 3px 0 0; }
+
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
+        border-radius: 10px; border: 1.5px solid var(--border); background: #fff;
+        font-size: .84rem; font-weight: 600; color: var(--text-main);
+        text-decoration: none; transition: .2s; font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    }
+    .btn-back:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ── Search bar ── */
+    .search-wrap { margin-bottom: 20px; }
+    .search-field { position: relative; max-width: 340px; }
+    .search-field i {
+        position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+        color: #9AAACB; font-size: .9rem; pointer-events: none;
+    }
+    .search-field input {
+        width: 100%; padding: 10px 14px 10px 38px;
+        border: 1.5px solid var(--border); border-radius: 10px;
+        font-family: 'DM Sans', sans-serif; font-size: .88rem;
+        color: var(--text-main); background: #fff; outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .search-field input::placeholder { color: #B0BEDB; }
+    .search-field input:focus {
+        border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,.1);
+    }
+
+    /* ══ Tab shell ══ */
+    .svc-tab-shell {
+        background: #fff; border: 1px solid var(--border);
+        border-radius: var(--radius); overflow: hidden;
+        box-shadow: 0 4px 24px rgba(15,31,61,.06);
+    }
+    .svc-tab-nav {
+        display: flex; align-items: stretch; border-bottom: 2px solid var(--border);
+        background: #F8F9FC; overflow-x: auto; scrollbar-width: none;
+    }
+    .svc-tab-nav::-webkit-scrollbar { display: none; }
+
+    .svc-tab-btn {
+        display: flex; align-items: center; gap: 8px; padding: 15px 24px;
+        font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600;
+        color: var(--text-sub); border: none; background: none; cursor: pointer;
+        white-space: nowrap; transition: color .18s, background .18s;
+        border-bottom: 2px solid transparent; margin-bottom: -2px;
+    }
+    .svc-tab-btn i { font-size: .88rem; opacity: .65; transition: opacity .18s; }
+    .svc-tab-btn:hover { color: var(--text-main); background: rgba(201,168,76,.03); }
+    .svc-tab-btn:hover i { opacity: 1; }
+    .svc-tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); background: #fff; }
+    .svc-tab-btn.active i { opacity: 1; color: var(--gold); }
+
+    .svc-tab-body { padding: 24px; min-height: 300px; }
+
+    /* ── Spinner ── */
+    .ajax-spinner {
+        display: flex; align-items: center; justify-content: center;
+        padding: 60px 20px; gap: 12px; color: var(--text-sub); font-size: .88rem;
+    }
+    .ajax-spinner .spin-ring {
+        width: 26px; height: 26px; border-radius: 50%;
+        border: 2.5px solid var(--border); border-top-color: var(--gold);
+        animation: spinRing .7s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+</style>
+
+<!-- ── Page Header ── -->
 <div class="page-header">
     <div>
         <div class="eyebrow">Service Details</div>
         <h2>{{ $service->name }}</h2>
         <p>{{ $service->description ?? 'No description' }}</p>
     </div>
-    <a href="{{ route('services.index') }}" class="btn-add">
+    <a href="{{ route('services.index') }}" class="btn-back">
         <i class="bi bi-arrow-left"></i> Back
     </a>
 </div>
 
-<!-- Tabs -->
-<ul class="nav nav-tabs mb-4" id="serviceTab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">Clients</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices" type="button" role="tab">Invoices</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">Payments</button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab">Reports</button>
-    </li>
-</ul>
+<!-- ── Search ── -->
+<div class="search-wrap">
+    <div class="search-field">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Search clients, invoices, payments…">
+    </div>
+</div>
 
-<div class="tab-content" id="serviceTabContent">
+<!-- ── Tabs + AJAX content ── -->
+<div class="svc-tab-shell">
 
-    <!-- Clients Tab -->
-    <div class="tab-pane fade show active" id="clients" role="tabpanel">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Client Name</th>
-                    <th>Total Invoiced</th>
-                    <th>Total Paid</th>
-                    <th>Outstanding</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($service->clientServices as $cs)
-                    <tr>
-                        <td>{{ $cs->client->full_name }}</td>
-                        <td>PKR {{ number_format($cs->invoices->sum('amount'),0) }}</td>
-                        <td>PKR {{ number_format($cs->payments->sum('amount'),0) }}</td>
-                        <td>PKR {{ number_format($cs->outstanding,0) }}</td>
-                        <td>
-                            <a href="{{ route('clients.show', $cs->client->id) }}" class="btn btn-sm btn-primary">View</a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="svc-tab-nav" role="tablist">
+        <button class="svc-tab-btn active" data-tab="clients">
+            <i class="bi bi-people-fill"></i> Clients
+        </button>
+        <button class="svc-tab-btn" data-tab="invoices">
+            <i class="bi bi-receipt-cutoff"></i> Invoices
+        </button>
+        <button class="svc-tab-btn" data-tab="payments">
+            <i class="bi bi-cash-stack"></i> Payments
+        </button>
     </div>
 
-    <!-- Invoices Tab -->
-    <div class="tab-pane fade" id="invoices" role="tabpanel">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Invoice #</th>
-                    <th>Client</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($service->clientServices as $cs)
-                    @foreach($cs->invoices as $invoice)
-                    <tr>
-                        <td>{{ $invoice->invoice_number }}</td>
-                        <td>{{ $cs->client->name }}</td>
-                        <td>PKR {{ number_format($invoice->total_amount,0) }}</td>
-                        <td>{{ $invoice->status }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#invoiceModal{{ $invoice->id }}">View</button>
-                        </td>
-                    </tr>
-
-                    <!-- Invoice Modal -->
-                    <div class="modal fade" id="invoiceModal{{ $invoice->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Invoice {{ $invoice->invoice_number }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>Client:</strong> {{ $cs->client->name }}</p>
-                                    <p><strong>Amount:</strong> ${{ number_format($invoice->total_amount,2) }}</p>
-                                    <p><strong>Status:</strong> {{ $invoice->status }}</p>
-                                    <p><strong>Details:</strong></p>
-                                    {!! $invoice->details !!}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @endforeach
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Payments Tab -->
-    <div class="tab-pane fade" id="payments" role="tabpanel">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Payment ID</th>
-                    <th>Client</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($service->clientServices as $cs)
-                    @foreach($cs->payments as $payment)
-                    <tr>
-                        <td>{{ $payment->id }}</td>
-                        <td>{{ $cs->client->name }}</td>
-                        <td>PKR {{ number_format($payment->amount,2) }}</td>
-                        <td>{{ $payment->created_at->format('Y-m-d') }}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#paymentModal{{ $payment->id }}">View</button>
-                        </td>
-                    </tr>
-
-                    <!-- Payment Modal -->
-                    <div class="modal fade" id="paymentModal{{ $payment->id }}" tabindex="-1">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Payment #{{ $payment->id }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p><strong>Client:</strong> {{ $cs->client->name }}</p>
-                                    <p><strong>Amount:</strong> ${{ number_format($payment->amount,2) }}</p>
-                                    <p><strong>Date:</strong> {{ $payment->created_at->format('Y-m-d') }}</p>
-                                    <p><strong>Notes:</strong> {!! $payment->notes !!}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @endforeach
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Reports Tab -->
-    <div class="tab-pane fade" id="report" role="tabpanel">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Client</th>
-                    <th>Total Invoices</th>
-                    <th>Total Payments</th>
-                    <th>Total Outstanding</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($service->clientServices as $cs)
-                <tr>
-                    <td>{{ $cs->client->name }}</td>
-                    <td>PKR {{ number_format($cs->invoices->sum('total_amount'),0) }}</td>
-                    <td>PKR {{ number_format($cs->payments->sum('amount'),0) }}</td>
-                    <td>PKR {{ number_format($cs->outstanding,0) }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="svc-tab-body" id="tabContent">
+        <div class="ajax-spinner">
+            <div class="spin-ring"></div>
+            <span>Loading…</span>
+        </div>
     </div>
 
 </div>
 
+@endsection
+
+
+@section('scripts')
+<script>
+let currentTab = 'clients';
+let debounceTimer = null;
+
+function loadData(page = 1) {
+    const search = document.getElementById('searchInput').value;
+
+    document.getElementById('tabContent').innerHTML =
+        `<div class="ajax-spinner"><div class="spin-ring"></div><span>Loading…</span></div>`;
+
+    fetch(`{{ route('services.ajax', $service->id) }}?tab=${currentTab}&page=${page}&search=${encodeURIComponent(search)}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('tabContent').innerHTML = html;
+        });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Initial load
+    loadData();
+
+    // Tab click
+    document.querySelectorAll('[data-tab]').forEach(button => {
+        button.addEventListener('click', function () {
+            document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentTab = this.dataset.tab;
+            loadData();
+        });
+    });
+
+    // Search with debounce
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => { loadData(); }, 400);
+    });
+
+});
+
+// Pagination click handler (important)
+document.getElementById('tabContent').addEventListener('click', function (e) {
+    const link = e.target.closest('a[href*="page="]');
+    if (!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const url = new URL(link.href);
+    const page = url.searchParams.get('page') ?? 1;
+    loadData(page);
+});
+</script>
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Permission;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
         Auth::user()?->loadMissing('role.permissions');
         Gate::before(function ($user, $ability) {
             return $user->hasPermission($ability) ? true : null;
