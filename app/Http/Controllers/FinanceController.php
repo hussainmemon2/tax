@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\ClientService;
 use App\Models\FinanceExpense;
-use App\Models\FinanceIncome;
 use App\Models\Invoice;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -31,7 +30,8 @@ public function index()
                 ->when($search, function ($q) use ($search) {
                     $q->where('invoice_number', 'like', "%{$search}%")
                     ->orWhereHas('client', function ($q2) use ($search) {
-                        $q2->where('full_name', 'like', "%{$search}%");
+                        $q2->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('cnic', 'like', "%{$search}%");
                     });
                 })
                 ->latest()
@@ -46,7 +46,8 @@ public function index()
                 ->when($search, function ($q) use ($search) {
                     $q->where('reference_no', 'like', "%{$search}%")
                     ->orWhereHas('client', function ($q2) use ($search) {
-                        $q2->where('full_name', 'like', "%{$search}%");
+                        $q2->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('cnic', 'like', "%{$search}%");
                     });
                 })
                 ->latest()
@@ -187,14 +188,7 @@ public function index()
                         'payment_date' => $pay['payment_date'],
                     ]);
 
-                    FinanceIncome::create([
-                        'client_id' => $request->client_id,
-                        'client_service_id' => $clientService->id,
-                        'payment_id' => $payment->id,
-                        'amount' => $pay['amount'],
-                        'income_date' => $pay['payment_date'],
-                        'category' => 'Service Payment',
-                    ]);
+
                 }
             }
 

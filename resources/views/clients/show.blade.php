@@ -442,14 +442,14 @@
     <div class="stat-card">
         <div class="stat-icon si-green"><i class="bi bi-check-circle-fill"></i></div>
         <div class="stat-body">
-            <div class="stat-value">PKR 120,000</div>
+            <div class="stat-value">PKR {{ number_format($totalPaid , 0) }}</div>
             <div class="stat-label">Total Paid</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon si-red"><i class="bi bi-exclamation-circle-fill"></i></div>
         <div class="stat-body">
-            <div class="stat-value">PKR 35,000</div>
+            <div class="stat-value">PKR {{ number_format($outstanding, 0) }}</div>
             <div class="stat-label">Outstanding</div>
         </div>
     </div>
@@ -684,27 +684,27 @@
                 <div class="info-field">
                     <label>Total Invoiced</label>
                     <div class="info-value">
-                        <i class="bi bi-receipt"></i>PKR 155,000
+                        <i class="bi bi-receipt"></i>PKR {{ number_format($totalInvoiced , 0)  }}
                     </div>
                 </div>
 
                 <div class="info-field">
                     <label>Total Paid</label>
                     <div class="info-value success">
-                        <i class="bi bi-check-circle-fill"></i>PKR 120,000
+                        <i class="bi bi-check-circle-fill"></i>PKR {{ number_format($totalPaid, 0) }}
                     </div>
                 </div>
 
                 <div class="info-field">
                     <label>Outstanding</label>
                     <div class="info-value danger">
-                        <i class="bi bi-exclamation-circle-fill"></i>PKR 35,000
+                        <i class="bi bi-exclamation-circle-fill"></i>PKR {{ number_format($outstanding, 0) }}
                     </div>
                 </div>
             <div class="info-field">
                     <label>Last Payment</label>
                     <div class="info-value">
-                        <i class="bi bi-calendar-check"></i>15-Feb-2024
+                        <i class="bi bi-calendar-check"></i>{{ $lastpaymentdate ? date('d-M-Y', strtotime($lastpaymentdate)) : 'No payments yet' }}
                     </div>
                 </div>
             </div>
@@ -712,20 +712,26 @@
             <div class="finance-bar-wrap">
                 <div class="finance-bar-label">
                     <span>Payment Progress</span>
-                    <span style="color:var(--text-main);font-weight:700;">PKR 120,000 / 155,000 (77%)</span>
+                    <span style="color:var(--text-main);font-weight:700;">
+                        PKR {{ number_format($totalPaid) }} / {{ number_format($totalInvoiced) }} 
+                        ({{ number_format($paymentPercent, 2) }}%)
+                    </span>
                 </div>
                 <div class="finance-bar-track">
-                    <div class="finance-bar-fill" style="width:77%;"></div>
+                    <div class="finance-bar-fill" style="width:{{ $paymentPercent }}%;"></div>
                 </div>
             </div>
 
             <div class="finance-bar-wrap">
                 <div class="finance-bar-label">
                     <span>Outstanding</span>
-                    <span style="color:#E05252;font-weight:700;">PKR 35,000 (23%)</span>
+                    <span style="color:#E05252;font-weight:700;">
+                        PKR {{ number_format($outstanding) }} 
+                        ({{ number_format($outstandingPercent, 2) }}%)
+                    </span>
                 </div>
                 <div class="finance-bar-track">
-                    <div class="finance-bar-fill danger" style="width:23%;"></div>
+                    <div class="finance-bar-fill danger" style="width:{{ $outstandingPercent }}%;"></div>
                 </div>
             </div>
 

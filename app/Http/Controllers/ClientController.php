@@ -6,6 +6,8 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
+use App\Models\Invoice;
+use App\Models\Payment;
 
 class ClientController extends Controller
 {
@@ -53,7 +55,14 @@ class ClientController extends Controller
     }
     public function show(Client $client)
     {
-        return view('clients.show', compact('client'));
+        $totalInvoiced = Invoice::where('client_id', $client->id)->sum('total_amount');
+        $totalPaid = Payment::where('client_id', $client->id)->sum('amount');
+        $outstanding = $totalInvoiced - $totalPaid;
+        $lastpaymentdate = Payment::where('client_id', $client->id)->latest('payment_date')->value('payment_date');
+        $paymentPercent     = $totalInvoiced > 0 ? ($totalPaid / $totalInvoiced) * 100 : 0; 
+        $outstandingPercent = $totalInvoiced > 0 ? ($outstanding / $totalInvoiced) * 100 : 0;
+
+        return view('clients.show', compact('client', 'totalInvoiced', 'totalPaid', 'outstanding', 'lastpaymentdate', 'paymentPercent', 'outstandingPercent'));
     }
     public function destroy(Client $client)
     {

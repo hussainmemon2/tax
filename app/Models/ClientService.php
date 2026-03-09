@@ -33,10 +33,7 @@ class ClientService extends Model
         return $this->hasMany(Document::class);
     }
 
-    public function financeIncome()
-    {
-        return $this->hasMany(FinanceIncome::class);
-    }
+
 
     // Outstanding helper
     public function getOutstandingAttribute()

@@ -188,6 +188,8 @@
                             <span class="chip-dot chip-dot-green"></span>
                             {{ $payment->client->full_name ?? '—' }}
                         </span>
+                        <br>
+                        <b>CNIC:</b> {{ $payment->client->cnic ?? '—' }}
                     </td>
                     <td>
                         <span class="money-cell">
@@ -222,7 +224,7 @@
                                 <div class="drow-list">
                                     <div class="drow">
                                         <div class="drow-lbl"><i class="bi bi-person"></i> Client</div>
-                                        <div class="drow-val">{{ $payment->client->full_name ?? '—' }}</div>
+                                        <div class="drow-val">{{ $payment->client->full_name ?? '—'  }}  - CNIC# {{ $payment->client->cnic }}</div>
                                     </div>
                                     <div class="drow">
                                         <div class="drow-lbl"><i class="bi bi-cash"></i> Amount</div>

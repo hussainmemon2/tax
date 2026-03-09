@@ -105,6 +105,12 @@
                     <i class="bi bi-files"></i> Documents
             </a>
         @endcan
+
+        @can('reports.view')
+            <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-break"></i> Reports
+            </a>
+        @endcan
     </div>
 
     <div class="sidebar-foot">
@@ -126,12 +132,6 @@
         </div>
 
         <div class="topbar-right">
-
-            <!-- Notifications -->
-            <button class="notif-btn">
-                <i class="bi bi-bell"></i>
-                <span class="notif-badge">3</span>
-            </button>
 
             <!-- Profile -->
             <div class="dropdown">

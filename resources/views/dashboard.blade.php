@@ -4,7 +4,6 @@
 
 @section('content')
 
-
 <!-- Page Header -->
 <div class="page-header">
     <div class="page-header-left">
@@ -19,14 +18,18 @@
 
 <!-- Quick Actions -->
 <div class="quick-actions">
-    <a href="#" class="qa-btn qa-btn-primary"><i class="bi bi-plus-lg"></i> New Client</a>
-    <a href="#" class="qa-btn qa-btn-gold"><i class="bi bi-file-earmark-plus"></i> New Case</a>
-    <a href="#" class="qa-btn qa-btn-outline"><i class="bi bi-download"></i> Export Report</a>
+    @can('clients.create')
+    <a href="{{ route('clients.create') }}" class="qa-btn qa-btn-primary"><i class="bi bi-plus-lg"></i> New Client</a>
+    @endcan
+    @can('services.manage')
+    <a href="{{ route('client_services.create') }}" class="qa-btn qa-btn-gold"><i class="bi bi-file-earmark-plus"></i> Assign Service</a>
+    @endcan
+
 </div>
 
 <!-- Stat Cards -->
 <div class="row g-4 stat-row">
-
+    @can('users.manage')
     <div class="col-sm-6 col-lg-4">
         <div class="stat-card stat-card-blue">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
@@ -37,7 +40,9 @@
             </div>
         </div>
     </div>
+    @endcan
 
+    @can('roles.manage')
     <div class="col-sm-6 col-lg-4">
         <div class="stat-card stat-card-gold">
             <div class="stat-icon"><i class="bi bi-shield-lock-fill"></i></div>
@@ -59,14 +64,16 @@
             </div>
         </div>
     </div>
-
+@endcan
 </div>
 
 <!-- Charts + Activity -->
+@can('finance.manage')
+    
 <div class="row g-4">
 
     <!-- Revenue Chart -->
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="section-card">
             <div class="section-card-header">
                 <h6><i class="bi bi-bar-chart-line me-2" style="color:var(--gold);"></i>Revenue Overview</h6>
@@ -80,50 +87,9 @@
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="col-lg-4">
-        <div class="section-card">
-            <div class="section-card-header">
-                <h6><i class="bi bi-activity me-2" style="color:var(--gold);"></i>Recent Activity</h6>
-                <span class="badge-pill">Live</span>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-dot dot-blue"><i class="bi bi-person-plus-fill"></i></div>
-                <div class="activity-body">
-                    <div class="activity-title">New user created</div>
-                    <div class="activity-meta">Admin added a user &middot; 2 min ago</div>
-                </div>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-dot dot-gold"><i class="bi bi-shield-check"></i></div>
-                <div class="activity-body">
-                    <div class="activity-title">Role updated</div>
-                    <div class="activity-meta">Manager permissions changed &middot; 18 min ago</div>
-                </div>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-dot dot-teal"><i class="bi bi-patch-check-fill"></i></div>
-                <div class="activity-body">
-                    <div class="activity-title">System update applied</div>
-                    <div class="activity-meta">Security patch deployed &middot; 1 hr ago</div>
-                </div>
-            </div>
-
-            <div class="activity-item">
-                <div class="activity-dot dot-red"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                <div class="activity-body">
-                    <div class="activity-title">Failed login attempt</div>
-                    <div class="activity-meta">Unknown IP blocked &middot; 3 hr ago</div>
-                </div>
-            </div>
-
-        </div>
-    </div>
 
 </div>
+@endcan
 
 @endsection
 
@@ -136,105 +102,149 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('live-date').textContent = d.toLocaleDateString('en-US', {
         weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
     });
+@can('finance.manage')
 
     // Chart toolbar
-    document.querySelectorAll('.chart-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
+$('.chart-btn').click(function(){
 
+    $('.chart-btn').removeClass('active');
+
+    $(this).addClass('active');
+
+    let range = $(this).text();
+
+    loadChart(range);
+
+});
     // Revenue chart
-    const ctx = document.getElementById('revenueChart');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [
+   let revenueChart;
+
+function loadChart(range='6M')
+{
+
+    $('#revenueChart').css('opacity','.3');
+
+    $.get("{{ route('dashboard.chart.data') }}",{range:range},function(res){
+
+        $('#revenueChart').css('opacity','1');
+
+        if(revenueChart){
+            revenueChart.destroy();
+        }
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        // gradients
+        const revenueGradient = ctx.createLinearGradient(0,0,0,300);
+        revenueGradient.addColorStop(0,'rgba(22,163,74,.35)');
+        revenueGradient.addColorStop(1,'rgba(22,163,74,.02)');
+
+        const expenseGradient = ctx.createLinearGradient(0,0,0,300);
+        expenseGradient.addColorStop(0,'rgba(59,130,246,.25)');
+        expenseGradient.addColorStop(1,'rgba(59,130,246,.02)');
+
+        const outstandingGradient = ctx.createLinearGradient(0,0,0,300);
+        outstandingGradient.addColorStop(0,'rgba(239,68,68,.25)');
+        outstandingGradient.addColorStop(1,'rgba(239,68,68,.02)');
+
+        revenueChart = new Chart(ctx,{
+            type:'line',
+            data:{
+                labels:res.labels,
+                datasets:[
                 {
-                    label: 'Revenue',
-                    data: [1200, 1900, 3000, 2500, 3200, 4100],
-                    borderColor: '#C9A84C',
-                    backgroundColor: function(context) {
-                        const chart = context.chart;
-                        const {ctx: c, chartArea} = chart;
-                        if (!chartArea) return 'transparent';
-                        const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0,  'rgba(201,168,76,.18)');
-                        gradient.addColorStop(1,  'rgba(201,168,76,.01)');
-                        return gradient;
-                    },
-                    borderWidth: 2.5,
-                    tension: 0.42,
-                    fill: true,
-                    pointBackgroundColor: '#C9A84C',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    label:'Revenue (PKR)',
+                    data:res.revenue,
+                    borderColor:'#16A34A',
+                    backgroundColor:revenueGradient,
+                    tension:.45,
+                    borderWidth:3,
+                    pointRadius:3,
+                    pointBackgroundColor:'#16A34A',
+                    fill:true
                 },
                 {
-                    label: 'Expenses',
-                    data: [800, 1100, 1600, 1400, 1800, 2200],
-                    borderColor: '#3B82F6',
-                    backgroundColor: 'rgba(59,130,246,.06)',
-                    borderWidth: 2,
-                    tension: 0.42,
-                    fill: true,
-                    pointBackgroundColor: '#3B82F6',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    align: 'end',
-                    labels: {
-                        boxWidth: 10,
-                        boxHeight: 10,
-                        borderRadius: 3,
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 12 },
-                        color: '#5A6A8A'
-                    }
+                    label:'Expenses (PKR)',
+                    data:res.expenses,
+                    borderColor:'#60A5FA',
+                    backgroundColor:expenseGradient,
+                    tension:.45,
+                    borderWidth:3,
+                    pointRadius:3,
+                    pointBackgroundColor:'#60A5FA',
+                    fill:true
                 },
-                tooltip: {
-                    backgroundColor: '#0B1B35',
-                    titleFont: { family: 'DM Sans', size: 12, weight: '600' },
-                    bodyFont:  { family: 'DM Sans', size: 12 },
-                    padding: 12,
-                    cornerRadius: 10,
-                    callbacks: {
-                        label: ctx => ' $' + ctx.parsed.y.toLocaleString()
-                    }
+                {
+                    label:'Outstanding (PKR)',
+                    data:res.outstanding,
+                    borderColor:'#EF4444',
+                    backgroundColor:outstandingGradient,
+                    borderDash:[6,6],
+                    tension:.45,
+                    borderWidth:2,
+                    pointRadius:3,
+                    pointBackgroundColor:'#EF4444',
+                    fill:false
                 }
+                ]
             },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { family: 'DM Sans', size: 12 }, color: '#8B9BBE' }
+
+            options:{
+                responsive:true,
+                interaction:{
+                    mode:'index',
+                    intersect:false
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(228,234,244,.7)', drawBorder: false },
-                    ticks: {
-                        font: { family: 'DM Sans', size: 12 },
-                        color: '#8B9BBE',
-                        callback: v => '$' + v.toLocaleString()
+
+                plugins:{
+                    legend:{
+                        position:'top',
+                        labels:{
+                            usePointStyle:true,
+                            padding:20
+                        }
+                    },
+
+                    tooltip:{
+                        backgroundColor:'#111',
+                        padding:12,
+                        callbacks:{
+                            label:function(context){
+                                return context.dataset.label + ': PKR ' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                },
+
+                scales:{
+                    x:{
+                        grid:{
+                            display:false
+                        }
+                    },
+
+                    y:{
+                        grid:{
+                            color:'rgba(200,200,200,.1)'
+                        },
+                        ticks:{
+                            callback:function(value){
+                                return 'PKR ' + value.toLocaleString();
+                            }
+                        }
                     }
                 }
             }
-        }
+        });
     });
+}
+loadChart('6M');
+@endcan
 });
 </script>
+<style>
+#revenueChart.loading{
+opacity:.3;
+filter:blur(1px);
+}
+</style>
 @endsection

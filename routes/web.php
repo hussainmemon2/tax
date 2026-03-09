@@ -8,12 +8,15 @@ use App\Http\Controllers\FinanceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/chart-data', [DashboardController::class,'chartData'])
+    ->name('dashboard.chart.data');
     Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.manage')->name('roles.index');
     Route::get('/roles/create', [RoleController::class, 'create'])->middleware('permission:roles.manage')->name('roles.create');
     Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.manage')->name('roles.store');
@@ -65,7 +68,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/finance/data', [FinanceController::class, 'ajaxData'])->name('finance.ajax');
     Route::get('/client-services/{id}', [FinanceController::class, 'getServices'])->name('finance.client_services');
     Route::get('/finance/total-invoiced', [FinanceController::class, 'totalInvoiced'])->name('finance.total_invoiced');
-
+   
+   
+    Route::get('/reports', [ReportController::class,'index'])->middleware('permission:reports.view')->name('reports.index');
+    Route::get('/reports/ajax', [ReportController::class,'ajax'])->name('reports.ajax');
     });
 Route::middleware(['auth', 'permission:users.manage'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');

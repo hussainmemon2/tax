@@ -186,7 +186,9 @@
                             <span class="chip-dot chip-dot-gold"></span>
                             {{ $invoice->client->full_name ?? '—' }}
                         </span>
-                    </td>
+                        <br>
+                        <b>CNIC:</b> {{ $invoice->client->cnic ?? '—' }}
+                        </td>
                     <td>
                         <span class="money-cell">
                             <span class="cur">PKR</span>{{ number_format($invoice->total_amount, 0) }}
@@ -224,7 +226,7 @@
                                     </div>
                                     <div class="drow">
                                         <div class="drow-lbl"><i class="bi bi-person"></i> Client</div>
-                                        <div class="drow-val">{{ $invoice->client->full_name ?? '—' }}</div>
+                                        <div class="drow-val">{{ $invoice->client->full_name ?? '—' }} - CNIC# {{ $invoice->client->cnic }}</div>
                                     </div>
                                     <div class="drow">
                                         <div class="drow-lbl"><i class="bi bi-cash"></i> Amount</div>

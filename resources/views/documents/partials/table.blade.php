@@ -144,6 +144,8 @@
                             <span class="chip-dot"></span>
                             {{ $doc->client->full_name ?? '—' }}
                         </span>
+                        <br>
+                        <b>CNIC:</b> {{ $doc->client->cnic ?? '—' }}
                     </td>
 
                     {{-- Service --}}

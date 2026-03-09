@@ -29,8 +29,6 @@ class Client extends Model
         'portal_registration_date'   => 'date',
     ];
 
-  
-
     public function portalCredentials()
     {
         return $this->hasMany(ClientPortalCredential::class);
@@ -49,11 +47,6 @@ class Client extends Model
     public function documents()
     {
         return $this->hasMany(Document::class);
-    }
-
-    public function income()
-    {
-        return $this->hasMany(FinanceIncome::class);
     }
 
     public function scopeIndividual($query)

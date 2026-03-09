@@ -18,7 +18,6 @@ class DocumentController extends Controller
     public function index()
     {
         $clients = Client::orderBy('full_name')->get();
-
         return view('documents.index', compact('clients'));
     }
     public function ajax(Request $request)
@@ -36,7 +35,8 @@ class DocumentController extends Controller
             $query->where(function($q) use ($search){
                 $q->where('file_name','like','%'.$search.'%')
                 ->orWhereHas('client', function($q2) use ($search){
-                    $q2->where('full_name','like','%'.$search.'%');
+                    $q2->where('full_name','like','%'.$search.'%')
+                    ->orWhere('cnic','like','%'.$search.'%');
                 });
             });
         }

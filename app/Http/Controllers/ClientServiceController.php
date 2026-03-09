@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
-use App\Models\FinanceIncome;
 use App\Models\Service;
 use App\Models\ClientService;
 use App\Models\Document;
@@ -104,14 +103,7 @@ class ClientServiceController extends Controller
                             'recorded_by' => Auth::id(),
                             'payment_date' => $pay['payment_date'],
                         ]);
-                          FinanceIncome::create([
-                            'client_id' => $request->client_id,
-                            'client_service_id' => $clientService->id,
-                            'payment_id' => $payment->id,
-                            'amount' => $pay['amount'],
-                            'income_date' => $pay['payment_date'],
-                            'category' => 'Service Payment',
-                        ]);
+
                     }
                 }
 
